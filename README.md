@@ -1,3 +1,8 @@
+<img width="1280" height="616" alt="image" src="https://github.com/user-attachments/assets/cd3edc02-9c9a-4f48-b4b7-1acd92dffdc9" />
+<img width="1280" height="616" alt="image" src="https://github.com/user-attachments/assets/e0a2b1b6-1c52-4a53-9ffb-4c949192a14f" />
+<img width="1280" height="467" alt="image" src="https://github.com/user-attachments/assets/5d035953-890a-4d88-8b8c-7ce762bb291e" />
+
+
 # Элитная Недвижимость - Агентство недвижимости
 
 Современный веб-сайт агентства недвижимости на Django с полным функционалом для работы риелторов и клиентов.
