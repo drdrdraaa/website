@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ realtor.first_name }} {{ realtor.last_name }} - Агентство недвижимости{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="realtor-profile card border-0 shadow-sm mb-4">
+                <div class="card-body text-center p-4">
+                    <div class="realtor-photo mb-3">
+                        {% if realtor.photo %}
+                            <img src="{{ realtor.photo.url }}" alt="{{ realtor.first_name }} {{ realtor.last_name }}" 
+                                 class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" 
+                                 style="width: 150px; height: 150px;">
+                                <i class="fas fa-user text-white fa-3x"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h3 class="mb-2">{{ realtor.first_name }} {{ realtor.last_name }}</h3>
+                    <p class="text-muted mb-3">Опыт работы: {{ realtor.experience_years }} лет</p>
+                    <div class="realtor-contact mb-3">
+                        <p class="mb-2"><i class="fas fa-phone me-2"></i>{{ realtor.phone }}</p>
+                        <p class="mb-2"><i class="fas fa-envelope me-2"></i>{{ realtor.email }}</p>
+                        <p class="mb-2"><i class="fas fa-percentage me-2"></i>Комиссия: {{ realtor.commission_rate }}%</p>
+                    </div>
+                    <div class="realtor-bio">
+                        <h5>О себе</h5>
+                        <p class="text-muted">{{ realtor.bio }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <h2 class="mb-4">Объекты недвижимости</h2>
+            <div class="row">
+                {% for property in properties %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="property-card card h-100 border-0 shadow-sm">
+                        {% if property.image %}
+                            <img src="{{ property.image.url }}" class="card-img-top" alt="{{ property.title }}" 
+                                 style="height: 200px; object-fit: cover;">
+                        {% else %}
+                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                 style="height: 200px;">
+                                <i class="fas fa-home text-muted fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ property.title }}</h5>
+                            <p class="text-muted small">{{ property.get_property_type_display }}</p>
+                            <p class="card-text">{{ property.description|truncatewords:20 }}</p>
+                            <div class="property-details mb-3">
+                                <div class="row small text-muted">
+                                    <div class="col-6">
+                                        <i class="fas fa-ruble-sign me-1"></i>{{ property.price|floatformat:0 }}
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fas fa-expand me-1"></i>{{ property.area }} м²
+                                    </div>
+                                    {% if property.rooms %}
+                                    <div class="col-6">
+                                        <i class="fas fa-bed me-1"></i>{{ property.rooms }} ком.
+                                    </div>
+                                    {% endif %}
+                                    {% if property.bathrooms %}
+                                    <div class="col-6">
+                                        <i class="fas fa-bath me-1"></i>{{ property.bathrooms }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="property-actions">
+                                <button class="btn btn-primary btn-sm w-100 mb-2" 
+                                        onclick="showCallModal({{ property.id }})">
+                                    <i class="fas fa-phone me-2"></i>Запросить звонок
+                                </button>
+                                <button class="btn btn-outline-primary btn-sm w-100" 
+                                        onclick="showPaymentModal({{ property.id }})">
+                                    <i class="fas fa-credit-card me-2"></i>Оплатить консультацию
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        У данного риелтора пока нет объектов недвижимости.
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно запроса звонка -->
+<div class="modal fade" id="callModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Запросить звонок</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="callRequestForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="propertyId" name="property_id">
+                    <input type="hidden" id="realtorId" name="realtor_id" value="{{ realtor.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="clientName" class="form-label">Ваше имя</label>
+                        <input type="text" class="form-control" id="clientName" name="client_name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="clientPhone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="clientPhone" name="client_phone" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="clientEmail" class="form-label">Email (необязательно)</label>
+                        <input type="email" class="form-control" id="clientEmail" name="client_email">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Сообщение</label>
+                        <textarea class="form-control" id="message" name="message" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEbQjVyy0_bXR0"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="submitCallRequest()">Отправить запрос</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно оплаты -->
+<div class="modal fade" id="paymentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Оплата консультации</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="paymentForm">
+                    {% csrf_token %}
+                    <input type="hidden" id="paymentPropertyId" name="property_id">
+                    <input type="hidden" id="paymentRealtorId" name="realtor_id" value="{{ realtor.id }}">
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Консультационная услуга: <strong>{{ realtor.commission_rate }}%</strong> от стоимости объекта
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentName" class="form-label">Ваше имя</label>
+                        <input type="text" class="form-control" id="paymentName" name="client_name" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentPhone" class="form-label">Телефон</label>
+                        <input type="tel" class="form-control" id="paymentPhone" name="client_phone" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="paymentEmail" name="client_email" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEbQjVyy0_bXR0"></div>
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            Я согласен с условиями предоставления услуг
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-primary" onclick="submitPayment()">
+                    <i class="fas fa-credit-card me-2"></i>Оплатить
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showCallModal(propertyId) {
+    document.getElementById('propertyId').value = propertyId;
+    var modal = new bootstrap.Modal(document.getElementById('callModal'));
+    modal.show();
+}
+
+function showPaymentModal(propertyId) {
+    document.getElementById('paymentPropertyId').value = propertyId;
+    var modal = new bootstrap.Modal(document.getElementById('paymentModal'));
+    modal.show();
+}
+
+function submitCallRequest() {
+    var form = document.getElementById('callRequestForm');
+    var formData = new FormData(form);
+    
+    fetch('/api/call-request/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Ваш запрос отправлен! Мы свяжемся с вами в ближайшее время.');
+            bootstrap.Modal.getInstance(document.getElementById('callModal')).hide();
+            form.reset();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при отправке запроса.');
+    });
+}
+
+function submitPayment() {
+    var form = document.getElementById('paymentForm');
+    var formData = new FormData(form);
+    
+    fetch('/api/payment/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Оплата успешно обработана! Мы свяжемся с вами для уточнения деталей.');
+            bootstrap.Modal.getInstance(document.getElementById('paymentModal')).hide();
+            form.reset();
+        } else {
+            alert('Ошибка: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Произошла ошибка при обработке оплаты.');
+    });
+}
+</script>
+{% endblock %}

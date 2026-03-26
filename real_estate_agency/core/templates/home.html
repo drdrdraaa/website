@@ -1,0 +1,139 @@
+{% extends 'base.html' %}
+
+{% block title %}Главная - Агентство недвижимости "Элитная Недвижимость"{% endblock %}
+
+{% block content %}
+<!-- Рекламный баннер -->
+<section class="hero-banner text-white text-center py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Элитная Недвижимость</h1>
+                <p class="lead mb-4">"Архитектура ваших мечтаний, фундамент вашего будущего"</p>
+                <div class="mb-4">
+                    <span class="badge bg-light text-dark fs-6">15 лет на рынке</span>
+                    <span class="badge bg-light text-dark fs-6 ms-2">1000+ довольных клиентов</span>
+                    <span class="badge bg-light text-dark fs-6 ms-2">Лучшие риелторы</span>
+                </div>
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-light btn-lg me-3">Регистрация</a>
+                    <a href="#realtors" class="btn btn-outline-light btn-lg">Наши риелторы</a>
+                {% endif %}
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <i class="fas fa-building display-1 opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Приветствие -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h2 class="mb-4">Добро пожаловать в мир элитной недвижимости!</h2>
+                <p class="lead text-muted mb-5">
+                    Мы предлагаем лучшие объекты недвижимости в Москве и Московской области. 
+                    Наши опытные риелторы помогут вам найти дом вашей мечты или выгодно продать вашу собственность.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Наши риелторы -->
+<section id="realtors" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Наши лучшие риелторы</h2>
+        <div class="row">
+            {% for realtor in realtors %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="realtor-card card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="realtor-photo mb-3">
+                            {% if realtor.photo %}
+                                <img src="{{ realtor.photo.url }}" alt="{{ realtor.first_name }} {{ realtor.last_name }}" 
+                                     class="rounded-circle img-fluid" style="width: 120px; height: 120px; object-fit: cover;">
+                            {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto" 
+                                     style="width: 120px; height: 120px;">
+                                    <i class="fas fa-user text-white fa-2x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <h5 class="card-title">{{ realtor.first_name }} {{ realtor.last_name }}</h5>
+                        <p class="text-muted small mb-2">Опыт: {{ realtor.experience_years }} лет</p>
+                        <p class="card-text small">{{ realtor.bio|truncatewords:15 }}</p>
+                        <div class="realtor-contact mb-3">
+                            <p class="small mb-1"><i class="fas fa-phone me-2"></i>{{ realtor.phone }}</p>
+                            <p class="small mb-1"><i class="fas fa-envelope me-2"></i>{{ realtor.email }}</p>
+                        </div>
+                        <div class="realtor-properties mb-3">
+                            <div class="row g-2">
+                                {% for property in realtor.properties.all|slice:":3" %}
+                                <div class="col-4">
+                                    {% if property.image %}
+                                        <img src="{{ property.image.url }}" alt="{{ property.title }}" 
+                                             class="img-fluid rounded" style="height: 80px; width: 100%; object-fit: cover;">
+                                    {% else %}
+                                        <div class="bg-light rounded d-flex align-items-center justify-content-center" 
+                                             style="height: 80px;">
+                                            <i class="fas fa-home text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                {% empty %}
+                                <div class="col-12">
+                                    <p class="text-muted small">Нет объектов</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <a href="{% url 'realtor_detail' realtor.id %}" class="btn btn-primary btn-sm w-100">
+                            Посмотреть объекты
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-muted">На данный момент нет доступных риелторов.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Преимущества -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Почему выбирают нас</h2>
+        <div class="row">
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                </div>
+                <h5>Безопасность</h5>
+                <p class="text-muted">Полная юридическая проверка всех объектов</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-chart-line fa-3x text-primary"></i>
+                </div>
+                <h5>Выгода</h5>
+                <p class="text-muted">Лучшие цены на рынке недвижимости</p>
+            </div>
+            <div class="col-md-4 text-center mb-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-clock fa-3x text-primary"></i>
+                </div>
+                <h5>Скорость</h5>
+                <p class="text-muted">Быстрое оформление сделок</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

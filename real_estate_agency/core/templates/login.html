@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Вход - Агентство недвижимости{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Вход в систему</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Имя пользователя</label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Пароль</label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEbQjVyy0_bXR0"></div>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Войти</button>
+                        </div>
+                    </form>
+                    
+                    <div class="text-center mt-4">
+                        <p>Нет аккаунта? <a href="{% url 'register' %}">Зарегистрируйтесь</a></p>
+                        <p class="text-muted small">
+                            Вы можете просматривать объекты и без входа в систему.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
